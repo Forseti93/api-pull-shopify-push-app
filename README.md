@@ -1,11 +1,27 @@
 ℹ️Referral link with 3 free days, to test Shopify possibilities for your store: https://shopify.pxf.io/6yd4Lm
 
-Starting point
+Resources to make the same app:
 
 1. A Partner account: https://www.shopify.com/tr/partners
 2. Create a new development store from your partner's dashboard. Stores -> "Add store" https://partners.shopify.com/
 3. Complete a "Scaffold an app" guide: https://shopify.dev/docs/apps/build/scaffold-app
-4. Check the guide "Build a Shopify app using Remix" to see deeper basics: https://shopify.dev/docs/apps/build/build?framework=remix
+4. Remix documentation: https://remix.run/docs/en/main
+5. React documentation: https://react.dev/
+
+Optional
+
+- Check the guide "Build a Shopify app using Remix" to see deeper basics: https://shopify.dev/docs/apps/build/build?framework=remix
+
+TODO list:
+
+1. to analyze how a ned product is pushed to the shop in the default application
+2. to replace default logic with pull & push from the API: https://fakestoreapi.com/
+
+---
+
+DEFAULT INSTRUCTIONS BELOW
+
+---
 
 # Shopify App Template - Remix
 
