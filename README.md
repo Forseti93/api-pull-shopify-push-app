@@ -14,8 +14,8 @@ Optional
 
 TODO list:
 
-1. to analyze how a ned product is pushed to the shop in the default application
-2. to replace default logic with pull & push from the API: https://fakestoreapi.com/
+1. to analyze how a new product is pushed to the shop in the default application
+2. to pull from the API: https://fakestoreapi.com/ and push it as a new product via GraphQL mutation
 
 ---
 
