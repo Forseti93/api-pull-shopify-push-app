@@ -1,21 +1,20 @@
-ℹ️Referral link with 3 free days, to test Shopify possibilities for your store: https://shopify.pxf.io/6yd4Lm
+This is an embedded custom app built with Remix and Polaris for a Shopify store. 
+It fetches a chosen product from [fakestoreapi.com](https://fakestoreapi.com/docs#tag/Products/operation/getProductById) and adds that product to the "Products" section of a Shopify store.
 
-Resources to make the same app:
+👍[The Referral link with 3 free days](https://shopify.pxf.io/6yd4Lm) to test Shopify possibilities for your store
 
-1. A Partner account: https://www.shopify.com/tr/partners
-2. Create a new development store from your partner's dashboard. Stores -> "Add store" https://partners.shopify.com/
-3. Complete a "Scaffold an app" guide: https://shopify.dev/docs/apps/build/scaffold-app
-4. Remix documentation: https://remix.run/docs/en/main
-5. React documentation: https://react.dev/
+📑Resources to make the same app
+
+1. [A Partner account](https://partners.shopify.com/)
+2. Create a new development store from your partner's dashboard. Stores -> "Add store". https://partners.shopify.com/
+3. [The "Scaffold an app" guide](https://shopify.dev/docs/apps/build/scaffold-app)
+4. [Remix documentation](https://remix.run/docs/en/main)
+5. [React documentation](https://react.dev/)
 
 Optional
 
-- Check the guide "Build a Shopify app using Remix" to see deeper basics: https://shopify.dev/docs/apps/build/build?framework=remix
+- Check the guide ["Build a Shopify app using Remix"](https://shopify.dev/docs/apps/build/build?framework=remix) for more in-depth basics. 
 
-TODO list:
-
-1. to analyze how a new product is pushed to the shop in the default application
-2. to pull from the API: https://fakestoreapi.com/ and push it as a new product via GraphQL mutation
 
 ---
 
