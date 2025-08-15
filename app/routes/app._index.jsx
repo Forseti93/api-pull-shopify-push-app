@@ -39,12 +39,10 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
   const productToFetchId = formData.get("productToFetchId");
 
-  // 1. Fetch product from the external API
   const fakeStoreResponse = await fetch(
     `https://fakestoreapi.com/products/${productToFetchId}`,
   );
   if (!fakeStoreResponse.ok) {
-    // Handle case where the product isn't found or API fails
     return { error: "Failed to fetch product from Fake Store API." };
   }
   const externalProduct = await fakeStoreResponse.json();
