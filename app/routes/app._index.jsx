@@ -36,68 +36,98 @@ export const loader = async ({ request }) => {
 
 export const action = async ({ request }) => {
   const { admin } = await shopify.authenticate.admin(request);
-  const response = await admin.graphql(
+  const formData = await request.formData();
+  const productToFetchId = formData.get("productToFetchId");
+
+  // 1. Fetch product from the external API
+  const fakeStoreResponse = await fetch(
+    `https://fakestoreapi.com/products/${productToFetchId}`,
+  );
+  if (!fakeStoreResponse.ok) {
+    // Handle case where the product isn't found or API fails
+    return { error: "Failed to fetch product from Fake Store API." };
+  }
+  const externalProduct = await fakeStoreResponse.json();
+
+  const productCreateResponse = await admin.graphql(
     `#graphql
-      mutation populateProduct($product: ProductCreateInput!) {
-        productCreate(product: $product) {
+     mutation populateProduct($product: ProductCreateInput!, $media: [CreateMediaInput!]) {
+        productCreate(product: $product, media: $media) {
           product {
             id
             title
             handle
             status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
           }
         }
       }`,
     {
       variables: {
         product: {
-          title: `${color} Snowboard`,
+          title: externalProduct.title,
+          descriptionHtml: externalProduct.description,
+          productType: externalProduct.category,
+          vendor: "Fake Store API",
+          status: "DRAFT",
         },
+        media: [
+          {
+            mediaContentType: "IMAGE",
+            originalSource: externalProduct.image,
+          },
+        ],
       },
     },
   );
-  const responseJson = await response.json();
-  const product = responseJson.data.productCreate.product;
-  const variantId = product.variants.edges[0].node.id;
-  const variantResponse = await admin.graphql(
+  const productCreateResponseJson = await productCreateResponse.json();
+  const product = productCreateResponseJson.data.productCreate.product;
+
+  const variantsBulkCreateResponse = await admin.graphql(
     `#graphql
-    mutation shopifyRemixTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-        productVariants {
-          id
-          price
-          barcode
-          createdAt
+      mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+        productVariantsBulkCreate(productId: $productId, variants: $variants) {
+          productVariants {
+            id
+            price
+            sku
+          }
+          userErrors {
+            field
+            message
+          }
         }
-      }
-    }`,
+      }`,
     {
       variables: {
         productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
+        variants: [
+          {
+            price: externalProduct.price.toString(),
+          },
+        ],
       },
     },
   );
-  const variantResponseJson = await variantResponse.json();
+
+  const variantsBulkCreateResponseJson =
+    await variantsBulkCreateResponse.json();
+  console.log(JSON.stringify(variantsBulkCreateResponseJson, null, 2));
 
   return {
-    product: responseJson.data.productCreate.product,
-    variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
+    product: product,
+    variant:
+      variantsBulkCreateResponseJson.data.productVariantsBulkCreate
+        .productVariants[0],
   };
 };
 
 export default function Index() {
   const { shopDomainUrl } = useLoaderData();
+  const [rangeValue, setRangeValue] = useState(1);
+  const handleRangeSliderChange = useCallback(
+    (value) => setRangeValue(value),
+    [],
+  );
   const fetcher = useFetcher();
   const shopify = useAppBridge();
   const isLoading =
@@ -111,11 +141,6 @@ export default function Index() {
     .replace("https://", "")
     .replace(".com/", "")
     .replace(".myshopify.com", "");
-  const [rangeValue, setRangeValue] = useState(32);
-  const handleRangeSliderChange = useCallback(
-    (value) => setRangeValue(value),
-    [],
-  );
 
   useEffect(() => {
     if (productId) {
@@ -123,9 +148,13 @@ export default function Index() {
     }
   }, [productId, shopify]);
 
-  // const generateProduct = () => fetcher.submit({}, { method: "POST" });
-  // TODO: I was replacing the generateProduct button on fetch product
-  const fetchProduct = () => fetcher.submit({}, { method: "POST" });
+  const fetchProduct = () => {
+    const formData = new FormData();
+
+    formData.append("productToFetchId", rangeValue);
+
+    fetcher.submit(formData, { method: "POST" });
+  };
 
   return (
     <Page>
@@ -195,9 +224,6 @@ export default function Index() {
                     onChange={handleRangeSliderChange}
                     output
                   />
-                  {/* <Button loading={isLoading} onClick={generateProduct}>
-                    Generate a product
-                  </Button> */}
                   <Button loading={isLoading} onClick={fetchProduct}>
                     Fetch the product
                   </Button>
@@ -228,24 +254,6 @@ export default function Index() {
                       <pre style={{ margin: 0 }}>
                         <code>
                           {JSON.stringify(fetcher.data.product, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productVariantsBulkUpdate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(fetcher.data.variant, null, 2)}
                         </code>
                       </pre>
                     </Box>

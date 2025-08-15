@@ -3,7 +3,7 @@
 client_id = "5d3239dcf7420accaf744d775cf669d4"
 name = "products-pull-push-app"
 handle = "products-pull-push-app"
-application_url = "https://graduation-grass-menus-ru.trycloudflare.com"
+application_url = "https://intent-relevant-open-sunshine.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://graduation-grass-menus-ru.trycloudflare.com/auth/callback", "https://graduation-grass-menus-ru.trycloudflare.com/auth/shopify/callback", "https://graduation-grass-menus-ru.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://intent-relevant-open-sunshine.trycloudflare.com/auth/callback", "https://intent-relevant-open-sunshine.trycloudflare.com/auth/shopify/callback", "https://intent-relevant-open-sunshine.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
