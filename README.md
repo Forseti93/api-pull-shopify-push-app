@@ -1,5 +1,5 @@
 This is an embedded custom app built with Remix and Polaris for a Shopify store. 
-It fetches a chosen product from [fakestoreapi.com](https://fakestoreapi.com/docs#tag/Products/operation/getProductById) and adds that product to the "Products" section of a Shopify store.
+It fetches a chosen product from [fakestoreapi.com](https://fakestoreapi.com/docs#tag/Products/operation/getProductById) and adds that product to the "Products" of a Shopify store.
 
 👍[The Referral link with 3 free days](https://shopify.pxf.io/6yd4Lm) to test Shopify possibilities for your store
 
