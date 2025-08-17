@@ -10,6 +10,7 @@ It fetches a chosen product from [fakestoreapi.com](https://fakestoreapi.com/doc
 3. [The "Scaffold an app" guide](https://shopify.dev/docs/apps/build/scaffold-app)
 4. [Remix documentation](https://remix.run/docs/en/main)
 5. [React documentation](https://react.dev/)
+6. [Polaris React.js components](https://polaris-react.shopify.com/components)
 
 Optional
 
