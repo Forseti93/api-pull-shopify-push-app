@@ -15,6 +15,9 @@ import {
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import shopify from "../shopify.server";
+import { PRODUCT_CREATE_MUTATION } from "/app/graphql/mutations/productCreate.js";
+import { PUBLICATIONS_QUERY } from "../graphql/queries/publications.js";
+import { PUBLISHABLE_PUBLISH_MUTATION } from "../graphql/mutations/publishablePublish.js";
 
 export const loader = async ({ request }) => {
   const { admin } = await shopify.authenticate.admin(request);
@@ -31,13 +34,22 @@ export const loader = async ({ request }) => {
   const shopDomainUrlResponseJson = await shopDomainUrlResponse.json();
   const shopDomainUrl = shopDomainUrlResponseJson.data.shop.primaryDomain.url;
 
-  return { shopDomainUrl };
+  const publicationsResponse = await admin.graphql(PUBLICATIONS_QUERY);
+  const publicationsResponseJson = await publicationsResponse.json();
+  const publications = publicationsResponseJson.data.publications.edges;
+  const onlineStorePublication = publications.find(
+    (publication) => publication.node.name === "Online Store",
+  );
+  const onlineStorePublicationId = onlineStorePublication?.node.id;
+
+  return { shopDomainUrl, onlineStorePublicationId };
 };
 
 export const action = async ({ request }) => {
   const { admin } = await shopify.authenticate.admin(request);
   const formData = await request.formData();
   const productToFetchId = formData.get("productToFetchId");
+  const onlineStorePublicationId = formData.get("onlineStorePublicationId");
 
   const fakeStoreResponse = await fetch(
     `https://fakestoreapi.com/products/${productToFetchId}`,
@@ -47,75 +59,37 @@ export const action = async ({ request }) => {
   }
   const externalProduct = await fakeStoreResponse.json();
 
-  const productCreateResponse = await admin.graphql(
-    `#graphql
-     mutation populateProduct($product: ProductCreateInput!, $media: [CreateMediaInput!]) {
-        productCreate(product: $product, media: $media) {
-          product {
-            id
-            title
-            handle
-            status
-          }
-        }
-      }`,
-    {
-      variables: {
-        product: {
-          title: externalProduct.title,
-          descriptionHtml: externalProduct.description,
-          productType: externalProduct.category,
-          vendor: "Fake Store API",
-          status: "DRAFT",
-        },
-        media: [
-          {
-            mediaContentType: "IMAGE",
-            originalSource: externalProduct.image,
-          },
-        ],
+  const productCreateResponse = await admin.graphql(PRODUCT_CREATE_MUTATION, {
+    variables: {
+      product: {
+        title: externalProduct.title,
+        descriptionHtml: externalProduct.description,
+        productType: externalProduct.category,
+        vendor: "Fake Store API",
+        status: "ACTIVE",
       },
+      media: [
+        {
+          mediaContentType: "IMAGE",
+          originalSource: externalProduct.image,
+        },
+      ],
     },
-  );
+  });
   const productCreateResponseJson = await productCreateResponse.json();
   const product = productCreateResponseJson.data.productCreate.product;
 
-  const variantsBulkCreateResponse = await admin.graphql(
-    `#graphql
-      mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-        productVariantsBulkCreate(productId: $productId, variants: $variants) {
-          productVariants {
-            id
-            price
-            sku
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }`,
-    {
+  if (product) {
+    await admin.graphql(PUBLISHABLE_PUBLISH_MUTATION, {
       variables: {
-        productId: product.id,
-        variants: [
-          {
-            price: externalProduct.price.toString(),
-          },
-        ],
+        id: product.id,
+        input: [{ publicationId: onlineStorePublicationId }],
       },
-    },
-  );
-
-  const variantsBulkCreateResponseJson =
-    await variantsBulkCreateResponse.json();
-  console.log(JSON.stringify(variantsBulkCreateResponseJson, null, 2));
+    });
+  }
 
   return {
     product: product,
-    variant:
-      variantsBulkCreateResponseJson.data.productVariantsBulkCreate
-        .productVariants[0],
   };
 };
 
